@@ -1,5 +1,6 @@
 const express = require("express")
 const connectDB = require("./config/db")
+const cors = require("cors")
 require("dotenv").config()
 const aiRoutes = require("./routes/ai/aiRoutes")
 const authRoutes = require("./routes/authRoutes")
@@ -9,6 +10,10 @@ const lawyerRoutes = require("./routes/lawyer/lawyerRoutes")
 
 const app = express()
 app.use(express.json())
+app.use(cors({
+  origin: "http://localhost:5173", // Frontend ka URL
+  credentials: true
+}))
 
 app.use("/api/auth", authRoutes)
 app.use("/api", commonRoutes)
