@@ -1,33 +1,38 @@
-const Groq = require("groq-sdk")
+// AI Service — Entry Point
+// Kaam: Controller aur Orchestrator ke beech bridge
+// Ye file bahut chhoti hai — sirf orchestrator ko expose karti hai
+//
+// Kal ko agar orchestrator replace karna ho ya
+// koi pre-processing add karni ho — sirf yahan karo
+// Controller ko chhuna nahi padega
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY
-})
+const { orchestrate } = require("./agents/orchestrator")
 
-const chatWithAI = async (userMessage, contextData) => {
-    const systemPrompt = `
-You are a personal AI assistant for a ${contextData.role}.
-You have access to their data:
-${JSON.stringify(contextData)}
+// Main service function
+// Controller yahi call karta hai
+const processQuery = async ({ query, userId, sessionId }) => {
 
-STRICT RULES:
-1. Only answer questions related to the user's own data
-2. If user asks about other roles data, just say:
-   "Aap ${contextData.role} hain, main sirf aapka data access kar sakta hun"
-3. Keep answers short and concise
-4. Never share data of other roles
-5. Always respond in the same language as the user
-`
+    // Input validation — basic checks
+    if (!query || !query.trim()) {
+        return {
+            reply: "Kripya kuch poochein.",
+            meta: { agent: "none", error: false }
+        }
+    }
 
-    const response = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage }
-        ]
+    if (!userId) {
+        return {
+            reply: "Authentication required.",
+            meta: { agent: "none", error: true }
+        }
+    }
+
+    // Orchestrator ko bhejo — poori pipeline yahan se chalti hai
+    return await orchestrate({
+        query: query.trim(),
+        userId,
+        sessionId,
     })
-
-    return response.choices[0].message.content
 }
 
-module.exports = { chatWithAI }
+module.exports = { processQuery }

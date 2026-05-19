@@ -1,51 +1,77 @@
-const { chatWithAI } = require("../../services/ai/aiService")
-const Client = require("../../models/common/clientModel")
-const Invoice = require("../../models/common/invoiceModel")
-const Tax = require("../../models/ca/taxModel")
-const Gst = require("../../models/ca/gstModel")
-const Audit = require("../../models/ca/auditModel")
-const Case = require("../../models/lawyer/caseModel")
-const Draft = require("../../models/lawyer/draftModel")
-const Document = require("../../models/common/documentModel")
-const { successResponse, errorResponse } = require("../../utils/responseHandler")
+// AI Controller
+// Kaam: HTTP request lena, aiService ko call karna, response bhejnaa
+// Route: POST /api/ai/chat
+//
+// Request format:
+//   { message, sessionId }
+//   Headers: Authorization: Bearer <JWT>
+//
+// Response format:
+//   { success: true, data: { reply, meta } }
 
-exports.chat = async (req, res) => {
+const { processQuery } = require("../../services/ai/aiService") 
+
+const chat = async (req, res) => {
     try {
-        const { message } = req.body
-        if (!message) {
-            return errorResponse(res, "Message required!", 400)
+console.log("BoDY::::: ",req.body)
+        // Request body se data lo
+        const { message, sessionId } = req.body
+
+
+        // userId — authMiddleware ne req.user mein set kiya hoga
+        // Colleague ka existing JWT middleware use ho raha hai
+        // const userId = req.user?.id || req.user?._id
+        // JWT mein _id field hai
+        const userId = req.user?._id
+        console.log("userId::: ",userId)
+
+        // SessionId — JWT ke _id se banao agar frontend ne nahi bheja
+        const effectiveSessionId = sessionId || `sess_${userId}`
+
+        // // Basic validation
+        if (!message || !message.trim()) {
+            return res.status(400).json({
+                success: false,
+                error: "Message is required"
+            })
         }
 
-        const role = req.user.role
-        let contextData = { role }
-
-        // CA ka data
-        if (role === "ca" || role === "hybrid") {
-            const [clients, taxes, gsts, audits, invoices] = await Promise.all([
-                Client.find({ userId: req.user.id }),
-                Tax.find({ userId: req.user.id }),
-                Gst.find({ userId: req.user.id }),
-                Audit.find({ userId: req.user.id }),
-                Invoice.find({ userId: req.user.id })
-            ])
-            contextData = { role, clients, taxes, gsts, audits, invoices }
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthorized"
+            })
         }
 
-        // Lawyer ka data
-        if (role === "lawyer" || role === "hybrid") {
-            const [clients, cases, drafts, invoices] = await Promise.all([
-                Client.find({ userId: req.user.id }),
-                Case.find({ userId: req.user.id }),
-                Draft.find({ userId: req.user.id }),
-                Invoice.find({ userId: req.user.id })
-            ])
-            contextData = { ...contextData, clients, cases, drafts, invoices }
-        }
+        // AI Service call karo
+        const result = await processQuery({
+            query: message,
+            userId: userId.toString(),
+            // sessionId: sessionId || null,
+            sessionId: effectiveSessionId ,
+        })
 
-        const aiResponse = await chatWithAI(message, contextData)
-        return successResponse(res, "AI response", { reply: aiResponse }, 200)
+        console.log("sessionId::::::: ",sessionId)
 
-    } catch (error) {
-        return errorResponse(res, error.message, 500)
+        // Success response
+        return res.status(200).json({
+            success: true,
+            data: {
+                reply: result.reply,
+                intent: result.meta?.intent || null,
+                module: result.meta?.module || null,
+                agent: result.meta?.agent || null,
+                sessionId: result.meta?.sessionId || sessionId,
+            }
+        })
+
+    } catch (err) {
+        console.error("[aiController] Unhandled error:", err.message)
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error"
+        })
     }
 }
+
+module.exports = { chat }
