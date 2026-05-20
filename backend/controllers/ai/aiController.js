@@ -15,18 +15,18 @@ const chat = async (req, res) => {
     try {
 console.log("BoDY::::: ",req.body)
         // Request body se data lo
+
+
         const { message, sessionId } = req.body
 
 
-        // userId — authMiddleware ne req.user mein set kiya hoga
-        // Colleague ka existing JWT middleware use ho raha hai
-        // const userId = req.user?.id || req.user?._id
-        // JWT mein _id field hai
         const userId = req.user?._id
         console.log("userId::: ",userId)
 
         // SessionId — JWT ke _id se banao agar frontend ne nahi bheja
         const effectiveSessionId = sessionId || `sess_${userId}`
+
+        console.log(effectiveSessionId)
 
         // // Basic validation
         if (!message || !message.trim()) {

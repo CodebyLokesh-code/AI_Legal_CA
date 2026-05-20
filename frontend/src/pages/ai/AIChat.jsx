@@ -23,7 +23,20 @@ export default function AIChat() {
   ])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
+  const [sessionId, setSessionId] = useState("")
   const bottomRef = useRef(null)
+
+
+  useEffect(() => {
+    setSessionId(localStorage.getItem("old_session_id") ??  createSession())
+    
+  })
+
+
+  const createSession = () => {
+    localStorage.setItem("old_session_id", `sess_${Date.now()}`)
+    return localStorage.getItem("old_session_id") 
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -31,6 +44,9 @@ export default function AIChat() {
 
   const sendMessage = async (text) => {
     const msg = text || input.trim()
+
+    if (!sessionId) return
+
     if (!msg) return
 
     setMessages(prev => [...prev, { role: "user", content: msg }])
@@ -38,10 +54,10 @@ export default function AIChat() {
     setLoading(true)
 
     try {
-      const res = await chatApi(msg)
+      const res = await chatApi(msg, sessionId)
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: res.data?.reply || res.data || "Koi response nahi mila!"
+        content: res.data?.reply || "Koi response nahi mila!"
       }])
     } catch (err) {
       toast.error("AI se response nahi mila!")
@@ -66,7 +82,6 @@ export default function AIChat() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
-          {/* Suggestions — sirf shuru mein dikhenge */}
           {messages.length === 1 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
               {suggestions.map((s, i) => (
@@ -94,11 +109,8 @@ export default function AIChat() {
                 transition={{ duration: 0.3 }}
                 className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
               >
-                {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  msg.role === "assistant"
-                    ? "bg-primary/10"
-                    : "bg-muted"
+                  msg.role === "assistant" ? "bg-primary/10" : "bg-muted"
                 }`}>
                   {msg.role === "assistant"
                     ? <Bot className="w-4 h-4 text-primary" />
@@ -106,8 +118,7 @@ export default function AIChat() {
                   }
                 </div>
 
-                {/* Message */}
-                <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-tr-sm"
                     : "bg-muted text-foreground rounded-tl-sm"
@@ -118,7 +129,6 @@ export default function AIChat() {
             ))}
           </AnimatePresence>
 
-          {/* Loading */}
           {loading && (
             <motion.div
               initial={{ opacity: 0 }}
