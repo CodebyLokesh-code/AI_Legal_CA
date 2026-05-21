@@ -100,6 +100,8 @@ const _formatResponse = ({ plan, validation, sessionId }) => {
     }
 }
 
+console.log("hsdfhskhfksuhfskuhfcksdu")
+
 // ── Error Response ──
 const _errorResponse = (err, sessionId) => {
     console.error("[orchestrator] Pipeline failed:", err)
@@ -108,6 +110,9 @@ const _errorResponse = (err, sessionId) => {
         meta: { agent: "error", error: true, errorMessage: err.message, sessionId },
     }
 }
+
+
+console.log("HBFSJHBSHFSDDHB")
 
 // ── Main Orchestrate Function ──
 const orchestrate = async ({ query, userId, sessionId }) => {
