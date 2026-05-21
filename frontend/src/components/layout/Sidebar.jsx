@@ -9,6 +9,7 @@ import {
 import useAuthStore from "../../store/authStore"
 
 const menuItems = [
+  { label: "AI Assistant", icon: Bot, path: "/ai-chat", roles: ["ca", "lawyer", "hybrid"] },
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", roles: ["ca", "lawyer", "hybrid"] },
   { label: "Clients", icon: Users, path: "/clients", roles: ["ca", "lawyer", "hybrid"] },
   { label: "Tax", icon: Calculator, path: "/ca/tax", roles: ["ca", "hybrid"] },
@@ -18,7 +19,7 @@ const menuItems = [
   { label: "Drafts", icon: BookOpen, path: "/lawyer/drafts", roles: ["lawyer", "hybrid"] },
   { label: "Invoices", icon: Receipt, path: "/invoices", roles: ["ca", "lawyer", "hybrid"] },
   { label: "Documents", icon: FolderOpen, path: "/documents", roles: ["ca", "lawyer", "hybrid"] },
-  { label: "AI Assistant", icon: Bot, path: "/ai-chat", roles: ["ca", "lawyer", "hybrid"] },
+  
 ]
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {

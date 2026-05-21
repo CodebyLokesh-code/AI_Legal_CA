@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import useChatStore from "./chatStore"
 
 const useAuthStore = create(
   persist(
@@ -8,10 +9,18 @@ const useAuthStore = create(
       token: null,
 
       setAuth: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
+
+      logout: () => {
+        useChatStore.getState().clearChat()
+
+        set({
+          user: null,
+          token: null,
+        })
+      },
     }),
     {
-      name: "auth-storage", // localStorage mein is naam se save hoga
+      name: "auth-storage",
     }
   )
 )

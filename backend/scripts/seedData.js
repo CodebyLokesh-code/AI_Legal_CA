@@ -24,7 +24,7 @@ const Invoice = require("../models/common/invoiceModel")
 const Client = require("../models/common/clientModel")
 
 // ── Tera UserId ──
-const USER_ID = "6a045f339e6c6a73cff95997"
+const USER_ID = "69fdb753af26457a93f5a6bd"
 
 // ── Helper: Random item from array ──
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
