@@ -60,19 +60,23 @@ export default function Clients() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name || !form.email) {
-      toast.error("Name aur email required hai!")
-      return
+    if (!form.name || !form.phone) {  // ← email optional, phone required
+        toast.error("Name aur phone required hai!")
+        return
     }
     setSaving(true)
     try {
-      if (editData) {
-        await updateClientApi(editData._id, form)
-        toast.success("Client updated!")
-      } else {
-        await addClientApi(form)
-        toast.success("Client added!")
-      }
+        const payload = {
+            ...form,
+            phone: Number(form.phone)  // ← String to Number convert karo
+        }
+        if (editData) {
+            await updateClientApi(editData._id, payload)
+            toast.success("Client updated!")
+        } else {
+            await addClientApi(payload)
+            toast.success("Client added!")
+        }
       setModalOpen(false)
       fetchClients()
     } catch (err) {
