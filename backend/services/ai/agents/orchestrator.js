@@ -15,6 +15,7 @@ const { advocateAgent } = require("./advocateAgent")
 const { dataAgent } = require("./dataAgent")
 const { validate } = require("./validatorAgent")
 const { hotMemory } = require("../memory/hotMemory")
+const { researchAgent } = require("./researchAgent")
 
 const CONFIG = {
     ENABLE_VALIDATION: true,
@@ -27,6 +28,7 @@ const AGENT_REGISTRY = {
     ca: caAgent,
     advocate: advocateAgent,
     data: dataAgent,
+    research: researchAgent, 
 }
 
 // ── Step 1: History Load ──

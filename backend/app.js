@@ -13,6 +13,9 @@ const commonRoutes  = require("./routes/common/commonRoutes")
 const caRoutes      = require("./routes/ca/caRoutes")
 const lawyerRoutes  = require("./routes/lawyer/lawyerRoutes")
 
+// updated and add a new route
+const piDocumentRoutes = require("./routes/common/piDocumentRoutes")
+
 // ── Logger ────────────────────────────────────────
 const logger = winston.createLogger({
   level: "info",
@@ -61,6 +64,9 @@ app.use((req, res, next) => {
   next()
 })
 
+
+ 
+
 // ── Routes ────────────────────────────────────────
 app.get("/health", (req, res) =>
   res.json({ success: true, env: process.env.NODE_ENV, ts: new Date() })
@@ -70,6 +76,8 @@ app.use("/api/v1",       commonRoutes)
 app.use("/api/v1/ca",    caRoutes)
 app.use("/api/v1/lawyer", lawyerRoutes)
 app.use("/api/v1/ai",    aiLimiter, aiRoutes)
+//  update the cp=ode and register the new document pageindex  routes 
+app.use("/api/v1/pi-documents", piDocumentRoutes)
 
 // ── 404 ───────────────────────────────────────────
 app.use((req, res) =>
